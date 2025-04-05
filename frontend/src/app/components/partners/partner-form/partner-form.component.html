@@ -1,0 +1,62 @@
+<form [formGroup]="partnerForm" (ngSubmit)="onSubmit()" class="form-container">
+  <div class="form-row">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Alias</mat-label>
+      <input matInput formControlName="alias" required>
+      <mat-error>Alias is required</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-row">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Type</mat-label>
+      <input matInput formControlName="type" required>
+      <mat-error>Type is required</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-row">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Direction</mat-label>
+      <mat-select formControlName="direction" required>
+        @for (dir of directions; track dir) {
+          <mat-option [value]="dir">{{ dir }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="form-row">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Application</mat-label>
+      <input matInput formControlName="application">
+    </mat-form-field>
+  </div>
+
+  <div class="form-row">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Processed Flow Type</mat-label>
+      <mat-select formControlName="processedFlowType" required>
+        @for (flowType of flowTypes; track flowType) {
+          <mat-option [value]="flowType">{{ flowType }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="form-row">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" required rows="3"></textarea>
+      <mat-error>Description is required</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="button-row">
+    <button mat-raised-button color="primary" type="submit" 
+            [disabled]="partnerForm.invalid">
+      {{ isEdit ? 'Update Partner' : 'Create Partner' }}
+    </button>
+    <button mat-button type="button" routerLink="/partners">Cancel</button>
+  </div>
+</form>
