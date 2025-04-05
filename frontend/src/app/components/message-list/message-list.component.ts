@@ -3,17 +3,27 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { MessageService } from '../../services/message.service';
 import { Message } from '../../models/message.model';
 import { DatePipe } from '@angular/common';
 import { TruncatePipe } from '../../shared/truncate.pipe';
 import { RouterModule } from '@angular/router';
+import { MessageDetailsDialogComponent } from './message-details-dialog/message-details-dialog.component';
 
 @Component({
   selector: 'app-message-list',
   standalone: true,
-  imports: [ MatTableModule, MatPaginator, MatCardModule, DatePipe, MatProgressSpinnerModule, TruncatePipe, RouterModule ],
+  imports: [ 
+    MatTableModule, 
+    MatPaginator, 
+    MatCardModule, 
+    DatePipe, 
+    MatProgressSpinnerModule, 
+    TruncatePipe, 
+    RouterModule, 
+    MatDialogModule],
   templateUrl: './message-list.component.html',
   styleUrl: './message-list.component.scss'
 })
@@ -30,7 +40,7 @@ export class MessageListComponent implements OnInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private messageService: MessageService) { }
+  constructor(private messageService: MessageService, private dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.loadMessages();
@@ -58,5 +68,16 @@ export class MessageListComponent implements OnInit {
 
   onPageChange(event: PageEvent): void {
     this.loadMessages(event.pageIndex, event.pageSize);
+  }
+  
+  openMessageDetails(message: Message): void {
+    const dialogRef = this.dialog.open(MessageDetailsDialogComponent, {
+      data: message,
+      width: '600px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed', result);
+    });
   }
 }

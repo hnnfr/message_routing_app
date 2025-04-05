@@ -1,0 +1,44 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Message Details</mat-card-title>
+  </mat-card-header>
+  
+  <mat-card-content class="card-content">
+    <mat-list class="details-list">
+      <mat-list-item>
+        <span matListItemTitle>ID</span>
+        <span matListItemLine>{{ message.id }}</span>
+      </mat-list-item>
+      <mat-divider></mat-divider>
+
+      <mat-list-item>
+        <span matListItemTitle>Message ID</span>
+        <span matListItemLine>{{ message.messageId }}</span>
+      </mat-list-item>
+      <mat-divider></mat-divider>
+
+      <mat-list-item>
+        <span matListItemTitle>Correlation ID</span>
+        <span matListItemLine>{{ message.correlationId || 'N/A' }}</span>
+      </mat-list-item>
+      <mat-divider></mat-divider>
+
+      <mat-list-item>
+        <span matListItemTitle>Received</span>
+        <span matListItemLine>{{ message.receivedTimestamp | date:'medium' }}</span>
+      </mat-list-item>
+      <mat-divider></mat-divider>
+
+      <mat-list-item class="content-item">
+        <span matListItemTitle>Content</span>
+        <div matListItemLine class="content-container">
+          {{ message.content }}
+        </div>
+      </mat-list-item>
+    </mat-list>
+  </mat-card-content>
+  
+  <mat-card-actions align="end">
+    <button mat-raised-button color="primary" (click)="closeDialog()">Close</button>
+  </mat-card-actions>
+</mat-card>
