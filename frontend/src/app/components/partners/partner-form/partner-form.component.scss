@@ -1,0 +1,29 @@
+.form-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.form-row {
+  margin-bottom: 1.5rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.button-row {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+mat-form-field {
+  font-size: 14px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}

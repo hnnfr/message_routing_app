@@ -7,7 +7,7 @@ import { Message, MessageListResponse } from '../models/message.model';
   providedIn: 'root'
 })
 export class MessageService {
-  private apiUrl = '/api/messages'; // Update with your backend URL
+  private apiUrl = '/api/messages'; 
 
   constructor(private http: HttpClient) { }
 
