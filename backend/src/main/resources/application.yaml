@@ -1,0 +1,32 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  mvc:
+    format:
+      date-time: yyyy-MM-dd'T'HH:mm:ss
+  application:
+    name: message_routing
+  datasource:
+    url: jdbc:postgresql://postgres:5432/mq_messages
+    username: postgres
+    password: postgres123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+ibm:
+  mq:
+    host: ibm-mq
+    port: 1414
+    queue-manager: QM1
+    channel: DEV.APP.SVRCONN
+    queue: DEV.QUEUE.1
+    user: app
+    password: app_password
