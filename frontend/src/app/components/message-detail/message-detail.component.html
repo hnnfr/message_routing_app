@@ -1,0 +1,56 @@
+@if (message) {
+  <mat-card>
+    <mat-card-header>
+      <button mat-icon-button routerLink="/messages">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <mat-card-title>Message Details</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (isLoading) {
+        <div class="spinner-container">
+          <mat-spinner diameter="50"></mat-spinner>
+        </div>
+      } @else {
+        <mat-list>
+          <mat-list-item>
+            <span matListItemTitle>ID</span>
+            <span matListItemLine>{{message.id}}</span>
+          </mat-list-item>
+          
+          <mat-divider></mat-divider>
+          
+          <mat-list-item>
+            <span matListItemTitle>Message ID</span>
+            <span matListItemLine>{{message.messageId}}</span>
+          </mat-list-item>
+          
+          <mat-divider></mat-divider>
+          
+          <mat-list-item>
+            <span matListItemTitle>Correlation ID</span>
+            <span matListItemLine>{{message.correlationId || 'N/A'}}</span>
+          </mat-list-item>
+          
+          <mat-divider></mat-divider>
+          
+          <mat-list-item>
+            <span matListItemTitle>Received</span>
+            <span matListItemLine>{{message.receivedTimestamp | date:'medium'}}</span>
+          </mat-list-item>
+          
+          <mat-divider></mat-divider>
+          
+          <mat-list-item>
+            <span matListItemTitle>Content</span>
+            <!-- <span matListItemLine>{{message.content}}</span> -->
+            <div matListItemLine class="message-content">
+              {{message.content}}
+            </div>
+          </mat-list-item>
+        </mat-list>
+      }
+    </mat-card-content>
+  </mat-card>
+}

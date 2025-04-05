@@ -1,0 +1,118 @@
+services:
+  # IBM MQ Service
+  ibm-mq:
+    image: icr.io/ibm-messaging/mq
+    container_name: ibm-mq
+    ports:
+      - "1414:1414" # MQ listener port
+      - "9443:9443" # Web console
+    environment:
+      - LICENSE=accept
+      - MQ_QMGR_NAME=QM1
+      - MQ_ADMIN_PASSWORD=passw0rd
+      - MQ_APP_PASSWORD=app_password
+      - MQ_DEV=true # Relaxed security for development
+    volumes:
+      - qm1data:/mnt/mqm
+    healthcheck:
+      test: ["CMD", "/opt/mqm/bin/dspmq", "-m", "QM1", "-o", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mq-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_DB: mq_messages
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mq-network
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/mq_messages
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres123
+      - IBM_MQ_HOST=ibm-mq
+      - IBM_MQ_PORT=1414
+      - IBM_MQ_QUEUE_MANAGER=QM1
+      - IBM_MQ_CHANNEL=DEV.APP.SVRCONN
+      - IBM_MQ_QUEUE=DEV.QUEUE.1
+      - IBM_MQ_USER=app
+      - IBM_MQ_PASSWORD=app_password
+    depends_on:
+      ibm-mq:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    networks:
+      - mq-network
+
+  # Angular Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "4200:4200" # Angular dev server port
+    environment:
+      - NODE_ENV=development
+      # - CHOKIDAR_USEPOLLING=true # Enable hot-reload
+      # - API_URL=http://backend:8080/api
+    # volumes:
+    #   - ./frontend/src:/app/src # Live code updates
+    #   - ./frontend/angular.json:/app/angular.json
+    #   - ./frontend/package.json:/app/package.json
+    #   - ./frontend/tsconfig.json:/app/tsconfig.json
+    depends_on:
+      - backend
+    stdin_open: true # Keep container open
+    tty: true        # Allocate pseudo-TTY
+    networks:
+      - mq-network
+
+  # # Optional - PGAdmin for database management
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: pgadmin
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@example.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin123
+  #   ports:
+  #     - "5050:80"
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - mq-network
+
+volumes:
+  qm1data:
+  postgres-data:
+
+networks:
+  mq-network:
+    driver: bridge
