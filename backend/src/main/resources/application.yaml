@@ -10,9 +10,9 @@ spring:
   application:
     name: message_routing
   datasource:
-    url: jdbc:postgresql://postgres:5432/mq_messages
-    username: postgres
-    password: postgres123
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/mq_messages}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres123}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -23,10 +23,10 @@ spring:
         format_sql: true
 ibm:
   mq:
-    host: ibm-mq
-    port: 1414
-    queue-manager: QM1
-    channel: DEV.APP.SVRCONN
-    queue: DEV.QUEUE.1
-    user: app
-    password: app_password
+    host: ${IBM_MQ_HOST:localhost}
+    port: ${IBM_MQ_PORT:1414}
+    queue-manager: ${IBM_MQ_QUEUE_MANAGER:QM1}
+    channel: ${IBM_MQ_CHANNEL:DEV.APP.SVRCONN}
+    queue: ${IBM_MQ_QUEUE:DEV.QUEUE.1}
+    user: ${IBM_MQ_USER:app}
+    password: ${IBM_MQ_PASSWORD:app_password}

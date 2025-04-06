@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { PartnerService } from '../../../services/partner.service';
 import { Partner } from '../../../models/partner.model';
 import { MatTableModule } from '@angular/material/table';
@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
 import { TruncatePipe } from '../../../shared/truncate.pipe';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-partners-list',
@@ -26,10 +27,11 @@ import { TruncatePipe } from '../../../shared/truncate.pipe';
   templateUrl: './partners-list.component.html',
   styleUrls: ['./partners-list.component.scss']
 })
-export class PartnersListComponent implements OnInit {
+export class PartnersListComponent implements OnInit, OnDestroy {
   partners: Partner[] = [];
   displayedColumns: string[] = ['alias', 'type', 'direction', 'application', 'processedFlowType', 'description', 'actions'];
   isLoading = true;
+  private destroy$ = new Subject<void>(); 
 
   constructor(private partnerService: PartnerService, private dialog: MatDialog) {}
 
@@ -38,14 +40,16 @@ export class PartnersListComponent implements OnInit {
   }
 
   loadPartners(): void {
-    this.partnerService.getPartners().subscribe({
-      next: (partners) => {
-        this.partners = partners;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-      }
+    this.partnerService.getPartners()
+      .pipe(takeUntil(this.destroy$)) 
+      .subscribe({
+        next: (partners) => {
+          this.partners = partners;
+          this.isLoading = false;
+        },
+        error: () => {
+          this.isLoading = false;
+        }
     });
   }
 
@@ -57,21 +61,31 @@ export class PartnersListComponent implements OnInit {
       }
     });
 
-    dialogRef.afterClosed().subscribe(confirmed => {
-      if (confirmed) {
-        this.isLoading = true;
-        this.partnerService.deletePartner(id).subscribe({
-          next: () => {
-            this.loadPartners();
-            this.isLoading = false;
-          },
-          error: (err) => {
-            this.isLoading = false;
-            console.error(err);
-          }
-        });
-      }
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.isLoading = true;
+          this.partnerService.deletePartner(id)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.loadPartners();
+                this.isLoading = false;
+              },
+              error: (err) => {
+                this.isLoading = false;
+                console.error(err);
+              }
+          });
+        }
     });
+  }
+
+  ngOnDestroy(): void {
+    // Unsubscribe from any subscriptions
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
 }
