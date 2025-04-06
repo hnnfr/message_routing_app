@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
@@ -11,6 +11,7 @@ import { DatePipe } from '@angular/common';
 import { TruncatePipe } from '../../shared/truncate.pipe';
 import { RouterModule } from '@angular/router';
 import { MessageDetailsDialogComponent } from './message-details-dialog/message-details-dialog.component';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-message-list',
@@ -27,7 +28,7 @@ import { MessageDetailsDialogComponent } from './message-details-dialog/message-
   templateUrl: './message-list.component.html',
   styleUrls: ['./message-list.component.scss']
 })
-export class MessageListComponent implements OnInit {
+export class MessageListComponent implements OnInit, OnDestroy {
   dataSource = new MatTableDataSource<Message>();
   displayedColumns: string[] = ['id', 'messageId', 'content', 'correlationId', 'receivedTimestamp'];
   pagination = {
@@ -37,6 +38,7 @@ export class MessageListComponent implements OnInit {
     pageSize: 20
   };
   isLoading = false;
+  private destroy$ = new Subject<void>(); 
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -48,21 +50,23 @@ export class MessageListComponent implements OnInit {
 
   loadMessages(page: number = 0, size: number = 20): void {
     this.isLoading = true;
-    this.messageService.getMessages(page, size).subscribe({
-      next: (response) => {
-        this.dataSource.data = response.content;
-        this.pagination = {
-          currentPage: response.pageNumber,
-          totalItems: response.totalElements,
-          totalPages: response.totalPages,
-          pageSize: response.pageSize
-        };
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error loading messages', err);
-        this.isLoading = false;
-      }
+    this.messageService.getMessages(page, size)
+      .pipe(takeUntil(this.destroy$)) 
+      .subscribe({
+        next: (response) => {
+          this.dataSource.data = response.content;
+          this.pagination = {
+            currentPage: response.pageNumber,
+            totalItems: response.totalElements,
+            totalPages: response.totalPages,
+            pageSize: response.pageSize
+          };
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Error loading messages', err);
+          this.isLoading = false;
+        }
     });
   }
 
@@ -75,5 +79,10 @@ export class MessageListComponent implements OnInit {
       data: message,
       width: '600px'
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();  
   }
 }

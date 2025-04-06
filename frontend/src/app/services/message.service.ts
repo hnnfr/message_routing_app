@@ -23,26 +23,4 @@ export class MessageService {
   getMessage(id: number): Observable<Message> {
     return this.http.get<Message>(`${this.apiUrl}/${id}`);
   }
-
-  searchByContent(query: string): Observable<Message[]> {
-    return this.http.get<Message[]>(`${this.apiUrl}/search`, {
-      params: { content: query }
-    });
-  }
-
-  getByCorrelationId(correlationId: string): Observable<Message[]> {
-    return this.http.get<Message[]>(`${this.apiUrl}/correlation/${correlationId}`);
-  }
-
-  getByDateRange(start: Date, end: Date): Observable<Message[]> {
-    const startStr = start.toISOString();
-    const endStr = end.toISOString();
-    return this.http.get<Message[]>(`${this.apiUrl}/date-range`, {
-      params: { start: startStr, end: endStr }
-    });
-  }
-
-  getMessageCount(): Observable<number> {
-    return this.http.get<number>(`${this.apiUrl}/count`);
-  }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -7,6 +7,7 @@ import { MatCardModule } from '@angular/material/card';
 import { PartnerService } from '../../../services/partner.service';
 import { Partner, Direction, FlowType } from '../../../models/partner.model';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-partner-form',
@@ -22,11 +23,12 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
   templateUrl: './partner-form.component.html',
   styleUrls: ['./partner-form.component.scss']
 })
-export class PartnerFormComponent implements OnInit {
+export class PartnerFormComponent implements OnInit, OnDestroy {
   directions = Object.values(Direction);
   flowTypes = Object.values(FlowType);
   isEdit = false;
   private partnerId!: number | null;
+  private destroy$ = new Subject<void>();
 
   partnerForm = this.fb.group({
     alias: ['', Validators.required],
@@ -49,9 +51,11 @@ export class PartnerFormComponent implements OnInit {
     if (id) {
       this.partnerId = +id;
       this.isEdit = true;
-      this.partnerService.getPartnerById(this.partnerId).subscribe(partner => {
-        this.partnerForm.patchValue(partner);
-      });
+      this.partnerService.getPartnerById(this.partnerId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(partner => {
+          this.partnerForm.patchValue(partner);
+        });
     } else {
       this.partnerId = null;
     }
@@ -65,9 +69,17 @@ export class PartnerFormComponent implements OnInit {
       ? this.partnerService.updatePartner(this.partnerId!, partner)
       : this.partnerService.createPartner(partner);
 
-    operation.subscribe({
-      next: () => this.router.navigate(['/partners']),
-      error: err => console.error('Operation failed', err)
+    operation
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => this.router.navigate(['/partners']),
+        error: err => console.error('Operation failed', err)
     });
+  }
+
+  ngOnDestroy(): void {
+    // Unsubscribe from all subscriptions
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

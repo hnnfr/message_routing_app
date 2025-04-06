@@ -11,6 +11,18 @@ public class MessageListDto {
     private long totalElements;
     private int totalPages;
 
+    // for test
+    public static MessageListDto getInstance(List<MessageDto> content, long totalElements, int totalPages) {
+        MessageListDto dto = new MessageListDto();
+        dto.setContent(content);
+        dto.setPageNumber(0);
+        dto.setPageSize(0);
+        dto.setTotalElements(totalElements);
+        dto.setTotalPages(totalPages);
+        return dto;
+
+    }
+
     public static MessageListDto fromPage(Page<MessageDto> page) {
         MessageListDto dto = new MessageListDto();
         dto.setContent(page.getContent());
