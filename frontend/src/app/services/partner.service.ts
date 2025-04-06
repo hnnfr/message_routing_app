@@ -1,14 +1,13 @@
-// src/app/services/partner.service.ts
-
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Partner } from '../models/partner.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class PartnerService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = '/api/partners';
+  private apiUrl = `${environment.apiUrl}/partners`; 
 
   getPartners(): Observable<Partner[]> {
     return this.http.get<Partner[]>(this.apiUrl);
