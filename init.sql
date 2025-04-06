@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS mq_messages (
 CREATE INDEX idx_message_id ON mq_messages(message_id);
 CREATE INDEX idx_correlation_id ON mq_messages(correlation_id);
 
-COMMENT ON TABLE partners IS 'Stores MQ messages';
+COMMENT ON TABLE mq_messages IS 'Stores MQ messages';
 
 COMMENT ON COLUMN mq_messages.message_id IS 'Unique message identifier from the queueing system (e.g., JMSMessageID, AMQP Message ID)';
 COMMENT ON COLUMN mq_messages.message_content IS 'Complete message payload stored as text (supports structured data formats)';
