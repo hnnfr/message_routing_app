@@ -12,10 +12,12 @@ export class TruncatePipe implements PipeTransform {
       return value;
     }
 
+    let truncated = value.substring(0, limit);
     if (completeWords) {
-      limit = value.substr(0, limit).lastIndexOf(' ');
+      const lastSpaceIndex = truncated.lastIndexOf(' ');
+      truncated = truncated.substring(0, lastSpaceIndex >= 0 ? lastSpaceIndex : limit);
     }
 
-    return `${value.substr(0, limit)}${ellipsis}`;
+    return `${truncated}${ellipsis}`;
   }
 }

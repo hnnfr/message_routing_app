@@ -7,7 +7,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
   standalone: true,
   imports: [ MatDialogModule, MatButtonModule ],
   templateUrl: './delete-dialog.component.html',
-  styleUrl: './delete-dialog.component.scss'
+  styleUrls: ['./delete-dialog.component.scss']
 })
 export class DeleteDialogComponent {
   readonly dialogRef = inject(MatDialogRef<DeleteDialogComponent>);

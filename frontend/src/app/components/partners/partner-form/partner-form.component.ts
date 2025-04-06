@@ -26,6 +26,7 @@ export class PartnerFormComponent implements OnInit {
   directions = Object.values(Direction);
   flowTypes = Object.values(FlowType);
   isEdit = false;
+  private partnerId!: number | null;
 
   partnerForm = this.fb.group({
     alias: ['', Validators.required],
@@ -46,10 +47,13 @@ export class PartnerFormComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
+      this.partnerId = +id;
       this.isEdit = true;
-      this.partnerService.getPartnerById(+id).subscribe(partner => {
+      this.partnerService.getPartnerById(this.partnerId).subscribe(partner => {
         this.partnerForm.patchValue(partner);
       });
+    } else {
+      this.partnerId = null;
     }
   }
 
@@ -58,7 +62,7 @@ export class PartnerFormComponent implements OnInit {
 
     const partner = this.partnerForm.value as Partner;
     const operation = this.isEdit 
-      ? this.partnerService.updatePartner(partner.id!, partner)
+      ? this.partnerService.updatePartner(this.partnerId!, partner)
       : this.partnerService.createPartner(partner);
 
     operation.subscribe({

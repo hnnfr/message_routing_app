@@ -2,10 +2,10 @@ package com.hnn.msg.routing.service;
 
 import com.hnn.msg.routing.dto.MessageDto;
 import com.hnn.msg.routing.dto.MessageListDto;
-import com.hnn.msg.routing.exception.ResourceNotFoundException;
 import com.hnn.msg.routing.mapper.MessageMapper;
 import com.hnn.msg.routing.model.MqMessage;
 import com.hnn.msg.routing.repository.MqMessageRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -45,7 +45,7 @@ public class MessageServiceImpl implements MessageService {
         log.debug("Request to get message by id: {}", id);
         return messageRepository.findById(id)
                 .map(messageMapper::messageToDto)
-                .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Message not found with id: " + id));
     }
 
     @Override

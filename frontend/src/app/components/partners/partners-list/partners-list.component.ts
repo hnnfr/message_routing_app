@@ -1,4 +1,3 @@
-// src/app/partners/partners-list/partners-list.component.ts
 import { Component, OnInit } from '@angular/core';
 import { PartnerService } from '../../../services/partner.service';
 import { Partner } from '../../../models/partner.model';
@@ -10,6 +9,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
+import { TruncatePipe } from '../../../shared/truncate.pipe';
 
 @Component({
   selector: 'app-partners-list',
@@ -20,14 +20,15 @@ import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component'
     MatIconModule,
     RouterLink,
     MatCardModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule, 
+    TruncatePipe
   ],
   templateUrl: './partners-list.component.html',
   styleUrls: ['./partners-list.component.scss']
 })
 export class PartnersListComponent implements OnInit {
   partners: Partner[] = [];
-  displayedColumns: string[] = ['alias', 'type', 'direction', 'actions'];
+  displayedColumns: string[] = ['alias', 'type', 'direction', 'application', 'processedFlowType', 'description', 'actions'];
   isLoading = true;
 
   constructor(private partnerService: PartnerService, private dialog: MatDialog) {}

@@ -25,7 +25,7 @@ import { MessageDetailsDialogComponent } from './message-details-dialog/message-
     RouterModule, 
     MatDialogModule],
   templateUrl: './message-list.component.html',
-  styleUrl: './message-list.component.scss'
+  styleUrls: ['./message-list.component.scss']
 })
 export class MessageListComponent implements OnInit {
   dataSource = new MatTableDataSource<Message>();
@@ -71,13 +71,9 @@ export class MessageListComponent implements OnInit {
   }
   
   openMessageDetails(message: Message): void {
-    const dialogRef = this.dialog.open(MessageDetailsDialogComponent, {
+    this.dialog.open(MessageDetailsDialogComponent, {
       data: message,
       width: '600px'
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed', result);
     });
   }
 }
