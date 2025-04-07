@@ -36,7 +36,7 @@ You have several ways to interact with the application.
 https://localhost:9443/
 ``` 
 - use the credentials: admin / passw0rd
-- Note: it is HTTPS, not HTTP. The browser will show the warning about security issue => accepting the risk and advance
+- Note: it is HTTPS, not HTTP. The browser will show a warning about security issue => accepting the risk and advance
 
 ### Then, you can test the backend application using Postman (or Insomnia or the like)
 ``` 
