@@ -1,6 +1,7 @@
 package com.hnn.msg.routing.controller;
 
 import com.hnn.msg.routing.dto.PartnerDTO;
+import com.hnn.msg.routing.exception.GlobalExceptionHandler;
 import com.hnn.msg.routing.service.PartnerService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,9 @@ class PartnerControllerTest {
     private MockMvc mockMvc;
 
     private void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(partnerController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(partnerController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
     }
 
     @Test
@@ -82,6 +85,18 @@ class PartnerControllerTest {
                 .andExpect(jsonPath("$.id").value(1));
 
         verify(partnerService).getPartnerById(1L);
+    }
+
+    @Test
+    void getPartnerById_WhenNotExists_ShouldReturnNotFound() throws Exception {
+        setup();
+        when(partnerService.getPartnerById(99L))
+                .thenThrow(new EntityNotFoundException("Partner not found"));
+
+        mockMvc.perform(get("/partners/99"))
+                .andExpect(status().isNotFound());
+
+        verify(partnerService).getPartnerById(99L);
     }
 
     @Test

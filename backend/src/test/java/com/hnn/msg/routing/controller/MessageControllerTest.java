@@ -2,21 +2,19 @@ package com.hnn.msg.routing.controller;
 
 import com.hnn.msg.routing.dto.MessageDto;
 import com.hnn.msg.routing.dto.MessageListDto;
+import com.hnn.msg.routing.exception.GlobalExceptionHandler;
 import com.hnn.msg.routing.service.MessageService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -28,26 +26,18 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(controllers = MessageController.class)
+@Import({MessageService.class, GlobalExceptionHandler.class})
 class MessageControllerTest {
 
-    @Mock
-    private MessageService messageService;
-
-    @InjectMocks
-    private MessageController messageController;
-
+    @Autowired
     private MockMvc mockMvc;
 
-    private void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(messageController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .build();
-    }
+    @MockitoBean
+    private MessageService messageService;
 
     @Test
     void getAllMessages_ShouldReturnMessageListDto() throws Exception {
-        setup();
         MessageListDto expected = MessageListDto.getInstance(Collections.emptyList(), 0, 0);
         when(messageService.getAllMessages(any(Pageable.class))).thenReturn(expected);
 
@@ -63,7 +53,6 @@ class MessageControllerTest {
 
     @Test
     void getMessageById_WhenExists_ShouldReturnMessageDto() throws Exception {
-        setup();
         MessageDto expected = new MessageDto();
         when(messageService.getMessageById(1L)).thenReturn(expected);
 
@@ -75,8 +64,20 @@ class MessageControllerTest {
     }
 
     @Test
+    void getMessageById_WhenNotExists_ShouldReturnNotFound() throws Exception {
+        when(messageService.getMessageById(99L))
+                .thenThrow(new EntityNotFoundException("Message not found"));
+
+        mockMvc.perform(get("/messages/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.message").value("Message not found"));
+
+        verify(messageService).getMessageById(99L);
+    }
+
+    @Test
     void searchByContent_ShouldReturnMessages() throws Exception {
-        setup();
         List<MessageDto> expected = Collections.singletonList(new MessageDto());
         when(messageService.searchByContent(anyString())).thenReturn(expected);
 
@@ -91,7 +92,6 @@ class MessageControllerTest {
 
     @Test
     void getByCorrelationId_ShouldReturnMessages() throws Exception {
-        setup();
         List<MessageDto> expected = Collections.singletonList(new MessageDto());
         when(messageService.getByCorrelationId(anyString())).thenReturn(expected);
 
@@ -105,7 +105,6 @@ class MessageControllerTest {
 
     @Test
     void getByDateRange_ShouldReturnMessages() throws Exception {
-        setup();
         LocalDateTime start = LocalDateTime.now().minusDays(1);
         LocalDateTime end = LocalDateTime.now();
         List<MessageDto> expected = Collections.singletonList(new MessageDto());
@@ -125,7 +124,6 @@ class MessageControllerTest {
 
     @Test
     void getMessagesCount_ShouldReturnCount() throws Exception {
-        setup();
         when(messageService.getMessagesCount()).thenReturn(5L);
 
         mockMvc.perform(get("/messages/count"))
@@ -137,8 +135,6 @@ class MessageControllerTest {
 
     @Test
     void getByDateRange_WithInvalidDates_ShouldReturnBadRequest() throws Exception {
-        setup();
-
         mockMvc.perform(get("/messages/date-range")
                         .param("start", "invalid-date")
                         .param("end", "invalid-date"))
